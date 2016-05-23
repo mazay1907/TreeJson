@@ -1,0 +1,48 @@
+{
+  "name": "jsonfile",
+  "version": "2.3.1",
+  "description": "Easily read/write JSON files.",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jprichardson/node-jsonfile.git"
+  },
+  "keywords": [
+    "read",
+    "write",
+    "file",
+    "json",
+    "fs",
+    "fs-extra"
+  ],
+  "author": "JP Richardson <jprichardson@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+	"value" : "six",
+	"animal" : {
+		"sex":"men",
+		"age": {
+			"val1":"1",
+			"val2":"2",
+			"val3":"3",
+			"val4":"4",
+			"val5": {
+				"val11":"1",
+				"val12":"2",
+				"val13":"3"}
+			}
+		
+		}
+	},
+  "devDependencies": {
+    "mocha": "2.x",
+    "mock-fs": "^3.8.0",
+    "rimraf": "^2.4.0",
+    "standard": "^6.0.8"
+  },
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard",
+    "test": "npm run lint && npm run unit",
+    "unit": "mocha"
+  }
+}
