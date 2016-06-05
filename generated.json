@@ -1,9 +1,21 @@
 {
+  "name": "jsonfile",
+  "version": "2.3.1",
   "description": "Easily read/write JSON files.",
   "repository": {
     "type": "git",
     "url": "git@github.com:jprichardson/node-jsonfile.git"
   },
+  "keywords": [
+    "read",
+    "write",
+    "file",
+    "json",
+    "fs",
+    "fs-extra"
+  ],
+  "author": "JP Richardson <jprichardson@gmail.com>",
+  "license": "MIT",
   "dependencies": {
 	"value" : "six",
 	"animal" : {
