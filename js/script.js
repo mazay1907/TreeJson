@@ -9,7 +9,6 @@ var jsonFile = new XMLHttpRequest(),
     button = document.getElementById("button"),
     btnIsChecked = document.getElementById("checkboxSubmit");
 
-
 jsonFile.open("GET", linkToJson);
 jsonFile.send(null);
 jsonFile.onload = function () {
@@ -18,7 +17,6 @@ jsonFile.onload = function () {
     node = new Node();
     node.actionsToStartNodeProcess(parseJson, document.body);
 };
-
 // create items
 function Item() {
     this.type = "item";
@@ -42,49 +40,46 @@ Item.prototype.drawLiElement = function () {
     li.appendChild(textElem);
     return li;
 };
-Item.prototype.searchAndShownHidden = function (searchText, elem) {
+Item.prototype.searchAndShownHidden = function (searchText, itemElem) {
     var itemText = this.key + " : " + this.value;
     if (itemText.indexOf(searchText) != -1) {
-        elem.className = "shown";
+        itemElem.className = "shown";
     }
     else {
-        elem.className = "hidden";
+        itemElem.className = "hidden";
     }
-    chechAndChangeSibling(elem);
+    chechAndChangeSibling(itemElem);
 };
 
-
 function chechAndChangeSibling(element) {
-    var x = 0;
+    var isSiblingShown = 0;
     for (var i = 0; i < element.parentNode.children.length; i++) {
         switch (element.parentNode.children[i].className) {
             case "":
                 break;
             case "shown":
-                x = 1;
+                isSiblingShown = 1;
                 break;
             default:
                 break;
         }
     }
-    if (x == 1) {
+    if (isSiblingShown == 1) {
         if (element.parentNode.className != "ul-tree ul-drop") {
             element.parentNode.className = "shown";
         }
-        //console.log("test");
-        xq(element.parentNode);
-        function xq (element1) {
-            if (!element1.parentNode){
+        checkParentClass(element.parentNode);
+        function checkParentClass (parentOfElement) {
+            if (!parentOfElement.parentNode){
                 return;
             }
-            if (element1.parentNode.className != "ul-tree ul-drop") {
-            //console.log(element1.parentNode);
-            element1.parentNode.className = "shown";
-            xq(element1.parentNode);
+            if (parentOfElement.parentNode.className != "ul-tree ul-drop") {
+                parentOfElement.parentNode.className = "shown";
+                checkParentClass(parentOfElement.parentNode);
             }
         }
     }
-    else if (x == 0) {
+    else if (isSiblingShown == 0) {
         if (element.parentNode.className != "ul-tree ul-drop") {
             element.parentNode.className = "hidden";
             element.parentNode.parentNode.className = "hidden";
@@ -109,27 +104,21 @@ Node.prototype.checkTheValueIsObject = function (objectForParse) {
             var nodeParent = new Node();
             nodeParent.nameOfNode(key);
             nodeParent.checkTheValueIsObject(objectForParse[key]);
-            //console.log(nodeParent);
             this.children.push(nodeParent.drawLiNameParent());
             this.childNode.push(nodeParent);
         }
         else {
             var item = new Item();
             item.addValue(key, objectForParse[key]);
-            //console.log(item.drawLiElement());
-
             this.children.push(item.drawLiElement());
             this.childNode.push(item);
-            //console.log(this.children[this.children.length - 1])
         }
-
     }
 };
 Node.prototype.nameOfNode = function (name) {
     this.name = name;
     return this.name;
 };
-
 // create the Node element as <li>name of node<ul><li>item</li></ul></li>
 Node.prototype.drawLiNameParent = function () {
     var liName = document.createElement("li"),
@@ -157,7 +146,6 @@ Node.prototype.printInDocument = function (element) {
     }
     body.appendChild(ulMain);
     showHideList(ulMain.className);
-    //console.log(this.children);
 };
 function showHideList(elem) {
     var ulMain = document.getElementsByClassName(elem)[0];
@@ -175,7 +163,6 @@ function showHideList(elem) {
                 if (ulChildren.classList.value == "hidden"){
             ulChildren.className = "";
             divIcon.style = "";
-
         }
         else {
             ulChildren.className = "hidden";
@@ -183,7 +170,6 @@ function showHideList(elem) {
         }
     };
 }
-
 Node.prototype.searchInTheChildNode = function (searchText) {
     if (!this.childNode) {
         return;
@@ -194,12 +180,9 @@ Node.prototype.searchInTheChildNode = function (searchText) {
         }
         else if (this.childNode[i].type == "node") {
             this.childNode[i].searchInTheChildNode(searchText);
-            //console.log(this.childNode[i]);
         }
     }
-
 };
-
 
 Node.prototype.checkAllCheckboxes= function() {
     if (!this.childNode) {
@@ -208,25 +191,15 @@ Node.prototype.checkAllCheckboxes= function() {
     for (var i = 0; i < this.childNode.length; i++) {
         if (this.childNode[i].type == "item") {
             this.childNode[i].checkValue(this.children[i]);
-
         }
         else if (this.childNode[i].type == "node") {
             this.childNode[i].checkAllCheckboxes();
         }
     }
-
 };
 
 function clearAllClassesHiddenShown() {
-    var ulMain = document.getElementsByClassName("ul-tree ul-drop")[0],
-        li = ulMain.getElementsByTagName("li"),
-        ul = ulMain.getElementsByTagName("ul");
-    for (var i = 0; i < li.length; i++) {
-        li[i].className = null;
-    }
-    for (var i = 0; i < ul.length; i++) {
-        ul[i].className = "";
-    }
+    node.searchInTheChildNode("");
 }
 // Search function
 input.addEventListener("search", getSearchValue);
@@ -238,8 +211,8 @@ button.addEventListener("click", clearAllClassesHiddenShown);
 // checkboxes functionality
 btnIsChecked.addEventListener("click", clickOnCheckbox);
 function clickOnCheckbox() {
+    node.checked = [];
     node.checkAllCheckboxes();
-// TODO check that the alert is dublicated previous data and hasn't been cleared
     var divForAlert = document.createElement("div");
     if (node.checked.length == 0){
         alert("Please, select any checkbox");
@@ -250,9 +223,6 @@ function clickOnCheckbox() {
             textForAlertElement.innerHTML = node.checked[i] + "<br />";
             divForAlert.appendChild(textForAlertElement);
         }
-        //alert(divForAlert.innerHTML);
         alert(divForAlert.innerText);
     }
-
 }
-//var divForAlert = "";
