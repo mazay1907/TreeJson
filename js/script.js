@@ -6,7 +6,9 @@ var jsonFile = new XMLHttpRequest(),
     linkToJson = "generated.json",
     node = {},
     input = document.getElementById("search"),
-    button = document.getElementById("button");
+    button = document.getElementById("button"),
+    btnIsChecked = document.getElementById("checkboxSubmit");
+
 
 jsonFile.open("GET", linkToJson);
 jsonFile.send(null);
@@ -26,9 +28,18 @@ Item.prototype.addValue = function (key, value) {
     this.value = value;
     return this.key + " : " + this.value;
 };
+Item.prototype.checkValue =function(val) {
+    if (val.getElementsByTagName("input")[0].checked == true) {
+        node.checked.push(val.innerText);
+    }
+};
 Item.prototype.drawLiElement = function () {
-    var li = document.createElement("li");
-    li.innerHTML = this.key + " : " + this.value;
+    var li = document.createElement("li"),
+        input = document.createElement("input"),
+        textElem = document.createTextNode(this.key + " : " + this.value);
+    input.type = "checkbox";
+    li.appendChild(input);
+    li.appendChild(textElem);
     return li;
 };
 Item.prototype.searchAndShownHidden = function (searchText, elem) {
@@ -40,9 +51,8 @@ Item.prototype.searchAndShownHidden = function (searchText, elem) {
         elem.className = "hidden";
     }
     chechAndChangeSibling(elem);
-
-
 };
+
 
 function chechAndChangeSibling(element) {
     var x = 0;
@@ -86,6 +96,7 @@ function Node() {
     this.type = "node";
     this.children = [];
     this.childNode = [];
+    this.checked = [];
 }
 Node.prototype.actionsToStartNodeProcess = function(parseJson, position) {
     this.checkTheValueIsObject(parseJson);
@@ -98,14 +109,18 @@ Node.prototype.checkTheValueIsObject = function (objectForParse) {
             var nodeParent = new Node();
             nodeParent.nameOfNode(key);
             nodeParent.checkTheValueIsObject(objectForParse[key]);
+            //console.log(nodeParent);
             this.children.push(nodeParent.drawLiNameParent());
             this.childNode.push(nodeParent);
         }
         else {
             var item = new Item();
             item.addValue(key, objectForParse[key]);
+            //console.log(item.drawLiElement());
+
             this.children.push(item.drawLiElement());
             this.childNode.push(item);
+            //console.log(this.children[this.children.length - 1])
         }
 
     }
@@ -113,7 +128,6 @@ Node.prototype.checkTheValueIsObject = function (objectForParse) {
 Node.prototype.nameOfNode = function (name) {
     this.name = name;
     return this.name;
-
 };
 
 // create the Node element as <li>name of node<ul><li>item</li></ul></li>
@@ -143,7 +157,7 @@ Node.prototype.printInDocument = function (element) {
     }
     body.appendChild(ulMain);
     showHideList(ulMain.className);
-    console.log(this.children);
+    //console.log(this.children);
 };
 function showHideList(elem) {
     var ulMain = document.getElementsByClassName(elem)[0];
@@ -169,15 +183,8 @@ function showHideList(elem) {
         }
     };
 }
-// Search function
-input.addEventListener("search", getSearchValue);
-function getSearchValue() {
-    node.searchInTheChildNode(input.value);
-}
 
 Node.prototype.searchInTheChildNode = function (searchText) {
-
-    //console.log(searchText);
     if (!this.childNode) {
         return;
     }
@@ -192,7 +199,23 @@ Node.prototype.searchInTheChildNode = function (searchText) {
     }
 
 };
-button.addEventListener("click",     clearAllClassesHiddenShown);
+
+
+Node.prototype.checkAllCheckboxes= function() {
+    if (!this.childNode) {
+        return;
+    }
+    for (var i = 0; i < this.childNode.length; i++) {
+        if (this.childNode[i].type == "item") {
+            this.childNode[i].checkValue(this.children[i]);
+
+        }
+        else if (this.childNode[i].type == "node") {
+            this.childNode[i].checkAllCheckboxes();
+        }
+    }
+
+};
 
 function clearAllClassesHiddenShown() {
     var ulMain = document.getElementsByClassName("ul-tree ul-drop")[0],
@@ -201,8 +224,35 @@ function clearAllClassesHiddenShown() {
     for (var i = 0; i < li.length; i++) {
         li[i].className = null;
     }
-    for (var i = 0; i < li.length; i++) {
+    for (var i = 0; i < ul.length; i++) {
         ul[i].className = "";
     }
 }
+// Search function
+input.addEventListener("search", getSearchValue);
+function getSearchValue() {
+    node.searchInTheChildNode(input.value);
+}
+// clear classes functionality
+button.addEventListener("click", clearAllClassesHiddenShown);
+// checkboxes functionality
+btnIsChecked.addEventListener("click", clickOnCheckbox);
+function clickOnCheckbox() {
+    node.checkAllCheckboxes();
+// TODO check that the alert is dublicated previous data and hasn't been cleared
+    var divForAlert = document.createElement("div");
+    if (node.checked.length == 0){
+        alert("Please, select any checkbox");
+    }
+    else {
+        for(var i = 0; i <node.checked.length; i++) {
+            var textForAlertElement = document.createElement("p");
+            textForAlertElement.innerHTML = node.checked[i] + "<br />";
+            divForAlert.appendChild(textForAlertElement);
+        }
+        //alert(divForAlert.innerHTML);
+        alert(divForAlert.innerText);
+    }
 
+}
+//var divForAlert = "";
